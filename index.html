@@ -7,7 +7,7 @@
 <title>Ristinolla</title>
 <style>
 :root{
-  --bg:#0e151d;--panel:#151f29;--panel-2:#1b2732;--ink:#f4f0e6;--muted:#91a0aa;
+  --bg:#070b18;--panel:#151f29;--panel-2:#1b2732;--ink:#f4f0e6;--muted:#91a0aa;
   --line:#2a3945;--x:#ff765e;--o:#72d8c6;--gold:#f4c76b;--shadow:0 22px 70px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -16,19 +16,27 @@ body{
   height:100svh;min-height:100svh;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
   color:var(--ink);font-family:ui-rounded,"SF Pro Rounded","Segoe UI",sans-serif;
   background:
-    radial-gradient(circle at 18% 8%,rgba(114,216,198,.11),transparent 27rem),
-    radial-gradient(circle at 90% 92%,rgba(255,118,94,.10),transparent 25rem),var(--bg);
+    radial-gradient(circle at 18% 8%,rgba(71,81,190,.20),transparent 27rem),
+    radial-gradient(circle at 90% 92%,rgba(178,66,145,.16),transparent 25rem),var(--bg);
   overflow:hidden;touch-action:manipulation;
 }
+.space{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(circle at 72% 18%,rgba(104,75,190,.12),transparent 20rem),radial-gradient(circle at 18% 72%,rgba(33,152,181,.10),transparent 24rem)}
+.star{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;background:#fff;opacity:var(--o);box-shadow:0 0 8px rgba(180,218,255,.8);animation:twinkle var(--d) ease-in-out infinite alternate;animation-delay:var(--delay)}
+.planet{position:absolute;border-radius:50%;opacity:.44;filter:blur(.2px);box-shadow:inset -14px -10px 22px rgba(0,0,0,.55),0 0 45px rgba(101,131,255,.12)}
+.planet.one{width:74px;height:74px;right:-24px;top:11%;background:linear-gradient(145deg,#6576dd,#cf78bd)}
+.planet.two{width:38px;height:38px;left:5%;bottom:11%;background:linear-gradient(145deg,#68cab9,#285178)}
+.banana{position:absolute;left:-70px;top:var(--y);font-size:var(--size);line-height:1;filter:drop-shadow(0 0 10px rgba(255,223,70,.45));animation:banana-flight var(--flight) linear forwards;will-change:transform}
+.banana.reverse{left:auto;right:-70px;animation-name:banana-flight-reverse}
+.comet{position:absolute;left:-18vw;top:var(--y);width:90px;height:2px;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(176,225,255,.25),#fff);box-shadow:0 0 10px rgba(160,216,255,.65);transform:rotate(-16deg);animation:comet-flight 2.8s ease-in forwards}
 button{font:inherit;color:inherit}
-.app{width:min(100%,470px)}
+.app{position:relative;z-index:2;width:min(100%,470px)}
 .topbar{display:flex;align-items:flex-end;justify-content:space-between;margin:0 4px 22px}
 .brand small{display:block;color:var(--muted);font-size:.73rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:3px}
 h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.1rem,10vw,3.2rem);font-weight:700;line-height:.9;letter-spacing:-.055em;margin:0}
 .settings{width:48px;height:48px;border:1px solid var(--line);border-radius:50%;background:var(--panel);display:grid;place-items:center;cursor:pointer;transition:.18s transform,.18s background}
 .settings:active{transform:scale(.94)}
 .settings svg{width:21px;height:21px}
-.card{position:relative;padding:20px;border:1px solid rgba(255,255,255,.065);border-radius:30px;background:linear-gradient(145deg,rgba(27,39,50,.96),rgba(18,28,37,.98));box-shadow:var(--shadow);overflow:hidden}
+.card{position:relative;padding:20px;border:1px solid rgba(140,178,255,.13);border-radius:30px;background:linear-gradient(145deg,rgba(27,39,50,.96),rgba(18,28,37,.98));box-shadow:var(--shadow),0 0 42px rgba(80,92,210,.09);overflow:hidden;animation:card-breathe 5s ease-in-out infinite alternate}
 .card:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(120deg,rgba(255,255,255,.055),transparent 32%)}
 .mode{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;background:#0d151c;border:1px solid var(--line);border-radius:15px;margin-bottom:18px}
 .mode button{min-height:43px;padding:8px 10px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:.86rem;font-weight:800;cursor:pointer;transition:.2s}
@@ -40,8 +48,9 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.1rem,10vw,3.2re
 .mark-mini.x{color:var(--x)}.mark-mini.o{color:var(--o)}
 .player-copy b{display:block;font-size:.85rem;white-space:nowrap}.player-copy span{color:var(--muted);font-size:.73rem}
 .score-num{font-family:Georgia,serif;font-size:2rem;line-height:1;color:var(--ink)}
+.score-num.bump{animation:score-bump .45s cubic-bezier(.2,1.7,.4,1)}
 .score-divider{color:#52616b;font-weight:700;font-size:1rem}
-.status{position:relative;text-align:center;height:27px;margin:0 0 12px;color:#d8e0df;font-weight:800;font-size:.93rem;letter-spacing:.01em}
+.status{position:relative;text-align:center;height:27px;margin:0 0 12px;color:#d8e0df;font-weight:800;font-size:.93rem;letter-spacing:.01em;animation:status-in .3s ease}
 .status .turn{display:inline-flex;align-items:center;gap:7px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--x);box-shadow:0 0 0 5px rgba(255,118,94,.10)}
 .dot.o{background:var(--o);box-shadow:0 0 0 5px rgba(114,216,198,.10)}
@@ -76,15 +85,23 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.1rem,10vw,3.2re
 @keyframes pop{0%{transform:scale(.2) rotate(-20deg);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes winner{to{transform:translateY(-2px);box-shadow:inset 0 0 25px rgba(244,199,107,.12)}}
 @keyframes fall{0%{transform:translate3d(0,-10vh,0) rotate(0);opacity:1}100%{transform:translate3d(var(--drift),105vh,0) rotate(700deg);opacity:0}}
+@keyframes twinkle{to{opacity:.18;transform:scale(.55)}}
+@keyframes banana-flight{0%{transform:translate3d(0,0,0) rotate(-25deg)}45%{transform:translate3d(52vw,-8vh,0) rotate(340deg)}100%{transform:translate3d(115vw,5vh,0) rotate(760deg)}}
+@keyframes banana-flight-reverse{0%{transform:translate3d(0,0,0) rotate(25deg)}45%{transform:translate3d(-52vw,8vh,0) rotate(-340deg)}100%{transform:translate3d(-115vw,-5vh,0) rotate(-760deg)}}
+@keyframes comet-flight{to{transform:translate3d(145vw,42vh,0) rotate(-16deg);opacity:0}}
+@keyframes card-breathe{to{box-shadow:var(--shadow),0 0 54px rgba(98,110,230,.15)}}
+@keyframes score-bump{50%{transform:scale(1.38);color:var(--gold)}}
+@keyframes status-in{from{opacity:.2;transform:translateY(-3px)}}
 @media (max-height:740px){.topbar{margin-bottom:13px}h1{font-size:2.2rem}.card{padding:14px;border-radius:24px}.mode{margin-bottom:10px}.score{margin-bottom:10px}.status{margin-bottom:6px}.actions{margin-top:11px}.new-game,.reset-score{min-height:46px}.hint{display:none}}
 @media (min-width:760px){.card{padding:25px}.board{gap:11px;padding:11px}}
-@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.confetti{display:none}}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.confetti,.banana,.comet{display:none}}
 </style>
 </head>
 <body>
+<div class="space" id="space" aria-hidden="true"><i class="planet one"></i><i class="planet two"></i></div>
 <main class="app">
   <header class="topbar">
-    <div class="brand"><small>Klassikkopeli</small><h1>Ristinolla</h1></div>
+    <div class="brand"><small>Kosminen klassikko</small><h1>Ristinolla</h1></div>
     <button class="settings" id="settingsBtn" aria-label="Avaa asetukset">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3V9.6h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 8.4a1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4h.1v4h-.1A1.7 1.7 0 0 0 20 14.4a1.7 1.7 0 0 0-.6.6Z"/></svg>
     </button>
@@ -117,6 +134,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.1rem,10vw,3.2re
     <div class="sheet-head"><h2 id="settingsTitle">Asetukset</h2><button class="close" id="closeModal" aria-label="Sulje">✕</button></div>
     <div class="setting-row"><div><label for="difficulty">Vaikeustaso</label><span>Tietokonevastustajan pelityyli</span></div><select class="select" id="difficulty"><option value="easy">Rento</option><option value="normal" selected>Fiksu</option><option value="hard">Voittamaton</option></select></div>
     <div class="setting-row"><div><label>Äänet</label><span>Siirrot ja kierroksen päätös</span></div><button class="switch on" id="soundSwitch" role="switch" aria-checked="true"><i></i></button></div>
+    <div class="setting-row"><div><label>Musiikki</label><span>Rauhallinen kosminen taustasävel</span></div><button class="switch on" id="musicSwitch" role="switch" aria-checked="true"><i></i></button></div>
   </section>
 </div>
 
@@ -127,7 +145,7 @@ const WIN=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 const boardEl=document.getElementById('board'),statusEl=document.getElementById('status');
 const xScoreEl=document.getElementById('xScore'),oScoreEl=document.getElementById('oScore'),oName=document.getElementById('oName');
 const aiModeBtn=document.getElementById('aiMode'),friendModeBtn=document.getElementById('friendMode');
-const difficulty=document.getElementById('difficulty'),soundSwitch=document.getElementById('soundSwitch');
+const difficulty=document.getElementById('difficulty'),soundSwitch=document.getElementById('soundSwitch'),musicSwitch=document.getElementById('musicSwitch'),space=document.getElementById('space');
 const store={
  get(key,fallback){try{const value=window.localStorage.getItem(key);return value===null?fallback:value}catch{return fallback}},
  set(key,value){try{window.localStorage.setItem(key,value)}catch{/* Peli toimii myös ilman tallennustilaa. */}}
@@ -135,7 +153,7 @@ const store={
 function savedScore(){try{const value=JSON.parse(store.get('tttScore','{"X":0,"O":0}'));return Number.isFinite(value.X)&&Number.isFinite(value.O)?value:{X:0,O:0}}catch{return {X:0,O:0}}}
 let board=Array(9).fill(''),turn='X',over=false,thinking=false,aiTimer=null,mode=store.get('tttMode','ai');
 let score=savedScore();
-let sound=store.get('tttSound','on')!=='off'; difficulty.value=store.get('tttDifficulty','normal');
+let sound=store.get('tttSound','on')!=='off',music=store.get('tttMusic','on')!=='off',musicTimer=null,musicStep=0; difficulty.value=store.get('tttDifficulty','normal');
 const cells=[];
 for(let i=0;i<9;i++){
  const b=document.createElement('button'); b.className='cell'; b.setAttribute('role','gridcell'); b.setAttribute('aria-label',`Ruutu ${i+1}, tyhjä`); b.dataset.i=i;
@@ -143,14 +161,17 @@ for(let i=0;i<9;i++){
 }
 function icon(mark){return mark==='X'?'<svg class="symbol x" viewBox="0 0 100 100" aria-hidden="true"><path d="M22 22 78 78M78 22 22 78"/></svg>':'<svg class="symbol o" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="31"/></svg>'}
 function result(b=board){for(const line of WIN){const [a,c,d]=line;if(b[a]&&b[a]===b[c]&&b[a]===b[d])return {winner:b[a],line}}return b.every(Boolean)?{winner:'draw',line:[]}:null}
-function setStatus(html){statusEl.innerHTML=html}
-function updateScore(){xScoreEl.textContent=score.X;oScoreEl.textContent=score.O;store.set('tttScore',JSON.stringify(score))}
-function tone(freq,dur=.08,type='sine',gain=.035){if(!sound)return;try{const ac=tone.ac||(tone.ac=new (window.AudioContext||window.webkitAudioContext)());const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(gain,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+dur);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+dur)}catch(e){}}
-function place(i,mark){board[i]=mark;const c=cells[i];c.innerHTML=icon(mark);c.classList.add('pop');c.disabled=true;c.setAttribute('aria-label',`Ruutu ${i+1}, ${mark==='X'?'risti':'nolla'}`);tone(mark==='X'?520:390)}
+function setStatus(html){statusEl.innerHTML=html;statusEl.style.animation='none';void statusEl.offsetWidth;statusEl.style.animation=''}
+function updateScore(bump){xScoreEl.textContent=score.X;oScoreEl.textContent=score.O;store.set('tttScore',JSON.stringify(score));if(bump){const el=bump==='X'?xScoreEl:oScoreEl;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}}
+function audioContext(){try{const ac=audioContext.ac||(audioContext.ac=new (window.AudioContext||window.webkitAudioContext)());if(ac.state==='suspended')ac.resume();return ac}catch{return null}}
+function tone(freq,dur=.08,type='sine',gain=.035,delay=0,channel='sfx'){if((channel==='sfx'&&!sound)||(channel==='music'&&!music))return;const ac=audioContext();if(!ac)return;const start=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq,start);g.gain.setValueAtTime(.001,start);g.gain.exponentialRampToValueAtTime(gain,start+.025);g.gain.exponentialRampToValueAtTime(.001,start+dur);o.connect(g).connect(ac.destination);o.start(start);o.stop(start+dur+.03)}
+function melody(notes,channel='sfx'){notes.forEach(([freq,delay,dur=.18,gain=.035,type='sine'])=>tone(freq,dur,type,gain,delay,channel))}
+function moveSound(mark){if(mark==='X')melody([[420,0,.06,.025,'triangle'],[620,.055,.09,.02,'sine']]);else melody([[360,0,.07,.025,'triangle'],[260,.06,.1,.022,'sine']])}
+function place(i,mark){board[i]=mark;const c=cells[i];c.innerHTML=icon(mark);c.classList.add('pop');c.disabled=true;c.setAttribute('aria-label',`Ruutu ${i+1}, ${mark==='X'?'risti':'nolla'}`);moveSound(mark)}
 function play(i){if(over||thinking||board[i])return;place(i,turn);finishOrContinue();}
-function finishOrContinue(){const r=result();if(r){end(r);return}turn=turn==='X'?'O':'X';renderTurn();if(mode==='ai'&&turn==='O'){thinking=true;cells.forEach(c=>c.disabled=true);setStatus('<span class="turn"><i class="dot o"></i>Kone miettii…</span>');aiTimer=setTimeout(()=>{aiTimer=null;aiMove()},430)}}
+function finishOrContinue(){const r=result();if(r){end(r);return}turn=turn==='X'?'O':'X';renderTurn();if(mode==='ai'&&turn==='O'){thinking=true;cells.forEach(c=>c.disabled=true);setStatus('<span class="turn"><i class="dot o"></i>Kone miettii…</span>');tone(190,.12,'sine',.012,.12);aiTimer=setTimeout(()=>{aiTimer=null;aiMove()},430)}}
 function renderTurn(){const who=mode==='ai'?(turn==='X'?'Sinun vuorosi':'Koneen vuoro'):(turn==='X'?'Ristin vuoro':'Nollan vuoro');setStatus(`<span class="turn"><i class="dot ${turn==='O'?'o':''}"></i>${who}</span>`);cells.forEach((c,i)=>c.disabled=over||thinking||!!board[i])}
-function end(r){over=true;thinking=false;cells.forEach(c=>c.disabled=true);if(r.winner==='draw'){setStatus('Tasapeli — hyvä taisto.');tone(260,.22,'triangle');return}score[r.winner]++;updateScore();r.line.forEach(i=>cells[i].classList.add('win'));const text=mode==='ai'?(r.winner==='X'?'Sinä voitit!':'Kone voitti.'):(r.winner==='X'?'Ristit voittivat!':'Nollat voittivat!');setStatus(text);tone(r.winner==='X'?760:320,.3,'triangle',.06);if((mode==='ai'&&r.winner==='X')||mode==='friend')confetti()}
+function end(r){over=true;thinking=false;cells.forEach(c=>c.disabled=true);if(r.winner==='draw'){setStatus('Tasapeli — hyvä taisto.');melody([[300,0,.16,.028,'triangle'],[260,.14,.18,.025,'triangle'],[220,.3,.25,.022,'sine']]);return}score[r.winner]++;updateScore(r.winner);r.line.forEach(i=>cells[i].classList.add('win'));const text=mode==='ai'?(r.winner==='X'?'Sinä voitit!':'Kone voitti.'):(r.winner==='X'?'Ristit voittivat!':'Nollat voittivat!');setStatus(text);const root=r.winner==='X'?440:220;melody([[root,0,.16,.035,'triangle'],[root*1.25,.12,.18,.035,'triangle'],[root*1.5,.24,.2,.04,'sine'],[root*2,.38,.4,.045,'sine']]);if((mode==='ai'&&r.winner==='X')||mode==='friend'){confetti();spawnBanana(true);spawnBanana(true)}}
 function aiMove(){if(over||mode!=='ai'||turn!=='O'){thinking=false;renderTurn();return}let i;const level=difficulty.value;if(level==='easy')i=randomMove();else if(level==='normal'&&Math.random()<.32)i=randomMove();else i=bestMove();thinking=false;place(i,'O');finishOrContinue()}
 function randomMove(){const free=board.map((v,i)=>v?'':i).filter(v=>v!=='');return free[Math.floor(Math.random()*free.length)]}
 function bestMove(){let best=-Infinity,move=0;for(let i=0;i<9;i++)if(!board[i]){board[i]='O';let s=minimax(board,0,false);board[i]='';if(s>best){best=s;move=i}}return move}
@@ -158,14 +179,24 @@ function minimax(b,depth,max){const r=result(b);if(r)return r.winner==='O'?10-de
 function newRound(){if(aiTimer!==null){clearTimeout(aiTimer);aiTimer=null}board=Array(9).fill('');turn='X';over=false;thinking=false;cells.forEach((c,i)=>{c.innerHTML='';c.className='cell';c.disabled=false;c.setAttribute('aria-label',`Ruutu ${i+1}, tyhjä`)});renderTurn()}
 function setMode(next){mode=next==='friend'?'friend':'ai';store.set('tttMode',mode);aiModeBtn.classList.toggle('active',mode==='ai');friendModeBtn.classList.toggle('active',mode==='friend');aiModeBtn.setAttribute('aria-pressed',mode==='ai');friendModeBtn.setAttribute('aria-pressed',mode==='friend');oName.textContent=mode==='ai'?'Kone':'Kaveri';difficulty.disabled=mode!=='ai';newRound()}
 function confetti(){const colors=['#ff765e','#72d8c6','#f4c76b','#f4f0e6'];for(let i=0;i<55;i++){const e=document.createElement('i');e.className='confetti';e.style.left=Math.random()*100+'vw';e.style.top='-20px';e.style.background=colors[i%colors.length];e.style.setProperty('--drift',(Math.random()*180-90)+'px');e.style.animationDelay=Math.random()*.28+'s';e.style.animationDuration=(1.15+Math.random()*.8)+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),2300)}}
+function makeSpace(){for(let i=0;i<76;i++){const s=document.createElement('i');s.className='star';s.style.setProperty('--x',Math.random()*100+'%');s.style.setProperty('--y',Math.random()*100+'%');s.style.setProperty('--s',(.7+Math.random()*2.2)+'px');s.style.setProperty('--o',(.28+Math.random()*.65).toFixed(2));s.style.setProperty('--d',(1.6+Math.random()*4)+'s');s.style.setProperty('--delay',(-Math.random()*5)+'s');space.appendChild(s)}spawnBanana();setTimeout(spawnComet,1800);scheduleBanana();setInterval(spawnComet,11000)}
+function spawnBanana(celebrate=false){const b=document.createElement('span');b.className='banana'+(Math.random()>.5?' reverse':'');b.textContent='🍌';b.style.setProperty('--y',(8+Math.random()*76)+'%');b.style.setProperty('--size',(celebrate?2.2+Math.random()*1.2:1.5+Math.random()*1.4)+'rem');const duration=celebrate?5+Math.random()*2:9+Math.random()*6;b.style.setProperty('--flight',duration+'s');space.appendChild(b);setTimeout(()=>b.remove(),duration*1000+300)}
+function scheduleBanana(){setTimeout(()=>{spawnBanana();scheduleBanana()},7000+Math.random()*7000)}
+function spawnComet(){const c=document.createElement('i');c.className='comet';c.style.setProperty('--y',(4+Math.random()*48)+'%');space.appendChild(c);setTimeout(()=>c.remove(),3100)}
+const spaceChords=[[130.81,196,261.63],[146.83,220,293.66],[110,164.81,220],[123.47,185,246.94]];
+function musicPulse(){if(!music||document.hidden)return;const chord=spaceChords[musicStep++%spaceChords.length];tone(chord[0],1.65,'sine',.009,0,'music');tone(chord[1],1.35,'sine',.006,.14,'music');tone(chord[2]*2,.55,'triangle',.003,.48,'music')}
+function startMusic(){if(!music||musicTimer)return;musicPulse();musicTimer=setInterval(musicPulse,1800)}
+function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}}
 function modal(open){const m=document.getElementById('modal');m.classList.toggle('open',open);m.setAttribute('aria-hidden',!open);if(open)document.getElementById('closeModal').focus();else document.getElementById('settingsBtn').focus()}
 document.getElementById('newGame').onclick=newRound;
 document.getElementById('resetScore').onclick=()=>{score={X:0,O:0};updateScore();newRound()};
 aiModeBtn.onclick=()=>setMode('ai');friendModeBtn.onclick=()=>setMode('friend');
 difficulty.onchange=()=>store.set('tttDifficulty',difficulty.value);
 soundSwitch.onclick=()=>{sound=!sound;store.set('tttSound',sound?'on':'off');soundSwitch.classList.toggle('on',sound);soundSwitch.setAttribute('aria-checked',sound);if(sound)tone(580)};
+musicSwitch.onclick=()=>{music=!music;store.set('tttMusic',music?'on':'off');musicSwitch.classList.toggle('on',music);musicSwitch.setAttribute('aria-checked',music);music?startMusic():stopMusic()};
 document.getElementById('settingsBtn').onclick=()=>modal(true);document.getElementById('closeModal').onclick=()=>modal(false);document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')modal(false)};document.addEventListener('keydown',e=>{if(e.key==='Escape')modal(false)});
-soundSwitch.classList.toggle('on',sound);soundSwitch.setAttribute('aria-checked',sound);setMode(mode);updateScore();
+document.addEventListener('pointerdown',startMusic,{once:true});document.addEventListener('keydown',startMusic,{once:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopMusic();else startMusic()});
+soundSwitch.classList.toggle('on',sound);soundSwitch.setAttribute('aria-checked',sound);musicSwitch.classList.toggle('on',music);musicSwitch.setAttribute('aria-checked',music);makeSpace();setMode(mode);updateScore();
 })();
 </script>
 </body>
