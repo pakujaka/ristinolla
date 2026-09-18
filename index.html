@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#111821">
+<title>Ristinolla</title>
+<style>
+:root{
+  --bg:#0e151d;--panel:#151f29;--panel-2:#1b2732;--ink:#f4f0e6;--muted:#91a0aa;
+  --line:#2a3945;--x:#ff765e;--o:#72d8c6;--gold:#f4c76b;--shadow:0 22px 70px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;margin:0}
+body{
+  min-height:100svh;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  color:var(--ink);font-family:ui-rounded,"SF Pro Rounded","Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 18% 8%,rgba(114,216,198,.11),transparent 27rem),
+    radial-gradient(circle at 90% 92%,rgba(255,118,94,.10),transparent 25rem),var(--bg);
+  overflow-x:hidden;
+}
+button{font:inherit;color:inherit}
+.app{width:min(100%,470px)}
+.topbar{display:flex;align-items:flex-end;justify-content:space-between;margin:0 4px 22px}
+.brand small{display:block;color:var(--muted);font-size:.73rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:3px}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.1rem,10vw,3.2rem);font-weight:700;line-height:.9;letter-spacing:-.055em;margin:0}
+.settings{width:48px;height:48px;border:1px solid var(--line);border-radius:50%;background:var(--panel);display:grid;place-items:center;cursor:pointer;transition:.18s transform,.18s background}
+.settings:active{transform:scale(.94)}
+.settings svg{width:21px;height:21px}
+.card{position:relative;padding:20px;border:1px solid rgba(255,255,255,.065);border-radius:30px;background:linear-gradient(145deg,rgba(27,39,50,.96),rgba(18,28,37,.98));box-shadow:var(--shadow);overflow:hidden}
+.card:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(120deg,rgba(255,255,255,.055),transparent 32%)}
+.mode{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;background:#0d151c;border:1px solid var(--line);border-radius:15px;margin-bottom:18px}
+.mode button{min-height:43px;padding:8px 10px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:.86rem;font-weight:800;cursor:pointer;transition:.2s}
+.mode button.active{color:var(--ink);background:var(--panel-2);box-shadow:0 3px 12px rgba(0,0,0,.25)}
+.score{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin:2px 5px 18px}
+.player{display:flex;align-items:center;gap:9px;min-width:0}
+.player.right{justify-content:flex-end;text-align:right}
+.mark-mini{display:grid;place-items:center;width:37px;height:37px;flex:0 0 auto;border-radius:12px;background:#0d151c;font-size:1.25rem;font-weight:900}
+.mark-mini.x{color:var(--x)}.mark-mini.o{color:var(--o)}
+.player-copy b{display:block;font-size:.85rem;white-space:nowrap}.player-copy span{color:var(--muted);font-size:.73rem}
+.score-num{font-family:Georgia,serif;font-size:2rem;line-height:1;color:var(--ink)}
+.score-divider{color:#52616b;font-weight:700;font-size:1rem}
+.status{position:relative;text-align:center;height:27px;margin:0 0 12px;color:#d8e0df;font-weight:800;font-size:.93rem;letter-spacing:.01em}
+.status .turn{display:inline-flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--x);box-shadow:0 0 0 5px rgba(255,118,94,.10)}
+.dot.o{background:var(--o);box-shadow:0 0 0 5px rgba(114,216,198,.10)}
+.board-wrap{position:relative;aspect-ratio:1}
+.board{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%;height:100%;padding:9px;border-radius:23px;background:#0d151c;border:1px solid var(--line)}
+.cell{position:relative;display:grid;place-items:center;min-width:0;min-height:0;border:1px solid #2b3a45;border-radius:16px;background:linear-gradient(145deg,#1e2b36,#17232d);cursor:pointer;overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.035);transition:transform .13s,border-color .18s,background .18s}
+.cell:not(:disabled):hover{border-color:#4b5e6b;background:#202f3a}.cell:not(:disabled):active{transform:scale(.94)}
+.cell:focus-visible,.mode button:focus-visible,.settings:focus-visible,.new-game:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.cell:disabled{cursor:default}
+.symbol{width:58%;height:58%;filter:drop-shadow(0 6px 9px rgba(0,0,0,.22))}
+.symbol.x path{stroke:var(--x)}.symbol.o circle{stroke:var(--o)}
+.symbol path,.symbol circle{fill:none;stroke-width:11;stroke-linecap:round}
+.cell.pop .symbol{animation:pop .3s cubic-bezier(.2,1.6,.4,1)}
+.cell.win{border-color:rgba(244,199,107,.78);background:linear-gradient(145deg,#31362f,#202b2d);animation:winner 1.05s ease-in-out infinite alternate}
+.cell.win .symbol{filter:drop-shadow(0 0 11px rgba(244,199,107,.4))}
+.actions{position:relative;display:flex;gap:10px;margin-top:17px}
+.new-game{flex:1;min-height:52px;border:0;border-radius:16px;background:var(--ink);color:#14202a;font-weight:900;letter-spacing:.01em;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.25);transition:.15s transform,.15s opacity}
+.new-game:active{transform:translateY(2px)}
+.reset-score{width:52px;min-height:52px;border:1px solid var(--line);border-radius:16px;background:var(--panel-2);color:var(--muted);cursor:pointer}
+.hint{text-align:center;color:#65747e;font-size:.72rem;margin:14px 0 0}
+.modal-backdrop{position:fixed;inset:0;z-index:10;display:grid;place-items:end center;padding:18px;background:rgba(4,8,11,.68);opacity:0;pointer-events:none;transition:.22s;backdrop-filter:blur(5px)}
+.modal-backdrop.open{opacity:1;pointer-events:auto}
+.sheet{width:min(100%,470px);padding:23px;border:1px solid var(--line);border-radius:27px;background:#17222c;box-shadow:var(--shadow);transform:translateY(24px);transition:.26s cubic-bezier(.2,.8,.2,1)}
+.open .sheet{transform:none}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.sheet h2{font-family:Georgia,serif;font-size:1.7rem;margin:0}
+.close{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:#101922;cursor:pointer}
+.setting-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:15px 0;border-top:1px solid var(--line)}
+.setting-row label{font-weight:800}.setting-row span{display:block;color:var(--muted);font-size:.76rem;font-weight:500;margin-top:3px}
+.select{padding:10px;border-radius:11px;color:var(--ink);background:#0e171f;border:1px solid var(--line);font-weight:700}
+.switch{width:51px;height:30px;border:0;border-radius:99px;padding:3px;background:#34434e;cursor:pointer;transition:.2s}.switch i{display:block;width:24px;height:24px;border-radius:50%;background:white;transition:.2s}.switch.on{background:var(--o)}.switch.on i{transform:translateX(21px)}
+.confetti{position:fixed;z-index:20;width:8px;height:14px;border-radius:2px;pointer-events:none;animation:fall 1.5s ease-in forwards}
+@keyframes pop{0%{transform:scale(.2) rotate(-20deg);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes winner{to{transform:translateY(-2px);box-shadow:inset 0 0 25px rgba(244,199,107,.12)}}
+@keyframes fall{0%{transform:translate3d(0,-10vh,0) rotate(0);opacity:1}100%{transform:translate3d(var(--drift),105vh,0) rotate(700deg);opacity:0}}
+@media (max-height:740px){.topbar{margin-bottom:13px}h1{font-size:2.2rem}.card{padding:14px;border-radius:24px}.mode{margin-bottom:10px}.score{margin-bottom:10px}.status{margin-bottom:6px}.actions{margin-top:11px}.new-game,.reset-score{min-height:46px}.hint{display:none}}
+@media (min-width:760px){.card{padding:25px}.board{gap:11px;padding:11px}}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.confetti{display:none}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="topbar">
+    <div class="brand"><small>Klassikkopeli</small><h1>Ristinolla</h1></div>
+    <button class="settings" id="settingsBtn" aria-label="Avaa asetukset">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3V9.6h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 8.4a1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4h.1v4h-.1A1.7 1.7 0 0 0 20 14.4a1.7 1.7 0 0 0-.6.6Z"/></svg>
+    </button>
+  </header>
+
+  <section class="card" aria-label="Ristinollapeli">
+    <nav class="mode" aria-label="Pelimuoto">
+      <button id="aiMode" class="active" aria-pressed="true">Tietokonetta vastaan</button>
+      <button id="friendMode" aria-pressed="false">Kaverin kanssa</button>
+    </nav>
+
+    <div class="score" aria-label="Pistetilanne">
+      <div class="player"><div class="mark-mini x">X</div><div class="player-copy"><b>Sinä</b><span>Ristit</span></div><div class="score-num" id="xScore">0</div></div>
+      <div class="score-divider">—</div>
+      <div class="player right"><div class="score-num" id="oScore">0</div><div class="player-copy"><b id="oName">Kone</b><span>Nollat</span></div><div class="mark-mini o">O</div></div>
+    </div>
+
+    <div class="status" id="status" aria-live="polite"><span class="turn"><i class="dot"></i>Sinun vuorosi</span></div>
+    <div class="board-wrap"><div class="board" id="board" role="grid" aria-label="3 kertaa 3 pelilauta"></div></div>
+    <div class="actions">
+      <button class="new-game" id="newGame">Uusi erä</button>
+      <button class="reset-score" id="resetScore" aria-label="Nollaa pisteet" title="Nollaa pisteet">↺</button>
+    </div>
+    <p class="hint">Peli tallentaa pistetilanteen tälle laitteelle.</p>
+  </section>
+</main>
+
+<div class="modal-backdrop" id="modal" aria-hidden="true">
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet-head"><h2 id="settingsTitle">Asetukset</h2><button class="close" id="closeModal" aria-label="Sulje">✕</button></div>
+    <div class="setting-row"><div><label for="difficulty">Vaikeustaso</label><span>Tietokonevastustajan pelityyli</span></div><select class="select" id="difficulty"><option value="easy">Rento</option><option value="normal" selected>Fiksu</option><option value="hard">Voittamaton</option></select></div>
+    <div class="setting-row"><div><label>Äänet</label><span>Siirrot ja kierroksen päätös</span></div><button class="switch on" id="soundSwitch" role="switch" aria-checked="true"><i></i></button></div>
+  </section>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const WIN=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+const boardEl=document.getElementById('board'),statusEl=document.getElementById('status');
+const xScoreEl=document.getElementById('xScore'),oScoreEl=document.getElementById('oScore'),oName=document.getElementById('oName');
+const aiModeBtn=document.getElementById('aiMode'),friendModeBtn=document.getElementById('friendMode');
+const difficulty=document.getElementById('difficulty'),soundSwitch=document.getElementById('soundSwitch');
+const store={
+ get(key,fallback){try{const value=window.localStorage.getItem(key);return value===null?fallback:value}catch{return fallback}},
+ set(key,value){try{window.localStorage.setItem(key,value)}catch{/* Peli toimii myös ilman tallennustilaa. */}}
+};
+function savedScore(){try{const value=JSON.parse(store.get('tttScore','{"X":0,"O":0}'));return Number.isFinite(value.X)&&Number.isFinite(value.O)?value:{X:0,O:0}}catch{return {X:0,O:0}}}
+let board=Array(9).fill(''),turn='X',over=false,thinking=false,aiTimer=null,mode=store.get('tttMode','ai');
+let score=savedScore();
+let sound=store.get('tttSound','on')!=='off'; difficulty.value=store.get('tttDifficulty','normal');
+const cells=[];
+for(let i=0;i<9;i++){
+ const b=document.createElement('button'); b.className='cell'; b.setAttribute('role','gridcell'); b.setAttribute('aria-label',`Ruutu ${i+1}, tyhjä`); b.dataset.i=i;
+ b.addEventListener('click',()=>play(i)); boardEl.appendChild(b); cells.push(b);
+}
+function icon(mark){return mark==='X'?'<svg class="symbol x" viewBox="0 0 100 100" aria-hidden="true"><path d="M22 22 78 78M78 22 22 78"/></svg>':'<svg class="symbol o" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="31"/></svg>'}
+function result(b=board){for(const line of WIN){const [a,c,d]=line;if(b[a]&&b[a]===b[c]&&b[a]===b[d])return {winner:b[a],line}}return b.every(Boolean)?{winner:'draw',line:[]}:null}
+function setStatus(html){statusEl.innerHTML=html}
+function updateScore(){xScoreEl.textContent=score.X;oScoreEl.textContent=score.O;store.set('tttScore',JSON.stringify(score))}
+function tone(freq,dur=.08,type='sine',gain=.035){if(!sound)return;try{const ac=tone.ac||(tone.ac=new (window.AudioContext||window.webkitAudioContext)());const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(gain,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+dur);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+dur)}catch(e){}}
+function place(i,mark){board[i]=mark;const c=cells[i];c.innerHTML=icon(mark);c.classList.add('pop');c.disabled=true;c.setAttribute('aria-label',`Ruutu ${i+1}, ${mark==='X'?'risti':'nolla'}`);tone(mark==='X'?520:390)}
+function play(i){if(over||thinking||board[i])return;place(i,turn);finishOrContinue();}
+function finishOrContinue(){const r=result();if(r){end(r);return}turn=turn==='X'?'O':'X';renderTurn();if(mode==='ai'&&turn==='O'){thinking=true;cells.forEach(c=>c.disabled=true);setStatus('<span class="turn"><i class="dot o"></i>Kone miettii…</span>');aiTimer=setTimeout(()=>{aiTimer=null;aiMove()},430)}}
+function renderTurn(){const who=mode==='ai'?(turn==='X'?'Sinun vuorosi':'Koneen vuoro'):(turn==='X'?'Ristin vuoro':'Nollan vuoro');setStatus(`<span class="turn"><i class="dot ${turn==='O'?'o':''}"></i>${who}</span>`);cells.forEach((c,i)=>c.disabled=over||thinking||!!board[i])}
+function end(r){over=true;thinking=false;cells.forEach(c=>c.disabled=true);if(r.winner==='draw'){setStatus('Tasapeli — hyvä taisto.');tone(260,.22,'triangle');return}score[r.winner]++;updateScore();r.line.forEach(i=>cells[i].classList.add('win'));const text=mode==='ai'?(r.winner==='X'?'Sinä voitit!':'Kone voitti.'):(r.winner==='X'?'Ristit voittivat!':'Nollat voittivat!');setStatus(text);tone(r.winner==='X'?760:320,.3,'triangle',.06);if((mode==='ai'&&r.winner==='X')||mode==='friend')confetti()}
+function aiMove(){if(over||mode!=='ai'||turn!=='O'){thinking=false;renderTurn();return}let i;const level=difficulty.value;if(level==='easy')i=randomMove();else if(level==='normal'&&Math.random()<.32)i=randomMove();else i=bestMove();thinking=false;place(i,'O');finishOrContinue()}
+function randomMove(){const free=board.map((v,i)=>v?'':i).filter(v=>v!=='');return free[Math.floor(Math.random()*free.length)]}
+function bestMove(){let best=-Infinity,move=0;for(let i=0;i<9;i++)if(!board[i]){board[i]='O';let s=minimax(board,0,false);board[i]='';if(s>best){best=s;move=i}}return move}
+function minimax(b,depth,max){const r=result(b);if(r)return r.winner==='O'?10-depth:r.winner==='X'?depth-10:0;if(max){let v=-Infinity;for(let i=0;i<9;i++)if(!b[i]){b[i]='O';v=Math.max(v,minimax(b,depth+1,false));b[i]=''}return v}else{let v=Infinity;for(let i=0;i<9;i++)if(!b[i]){b[i]='X';v=Math.min(v,minimax(b,depth+1,true));b[i]=''}return v}}
+function newRound(){if(aiTimer!==null){clearTimeout(aiTimer);aiTimer=null}board=Array(9).fill('');turn='X';over=false;thinking=false;cells.forEach((c,i)=>{c.innerHTML='';c.className='cell';c.disabled=false;c.setAttribute('aria-label',`Ruutu ${i+1}, tyhjä`)});renderTurn()}
+function setMode(next){mode=next==='friend'?'friend':'ai';store.set('tttMode',mode);aiModeBtn.classList.toggle('active',mode==='ai');friendModeBtn.classList.toggle('active',mode==='friend');aiModeBtn.setAttribute('aria-pressed',mode==='ai');friendModeBtn.setAttribute('aria-pressed',mode==='friend');oName.textContent=mode==='ai'?'Kone':'Kaveri';difficulty.disabled=mode!=='ai';newRound()}
+function confetti(){const colors=['#ff765e','#72d8c6','#f4c76b','#f4f0e6'];for(let i=0;i<55;i++){const e=document.createElement('i');e.className='confetti';e.style.left=Math.random()*100+'vw';e.style.top='-20px';e.style.background=colors[i%colors.length];e.style.setProperty('--drift',(Math.random()*180-90)+'px');e.style.animationDelay=Math.random()*.28+'s';e.style.animationDuration=(1.15+Math.random()*.8)+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),2300)}}
+function modal(open){const m=document.getElementById('modal');m.classList.toggle('open',open);m.setAttribute('aria-hidden',!open);if(open)document.getElementById('closeModal').focus();else document.getElementById('settingsBtn').focus()}
+document.getElementById('newGame').onclick=newRound;
+document.getElementById('resetScore').onclick=()=>{score={X:0,O:0};updateScore();newRound()};
+aiModeBtn.onclick=()=>setMode('ai');friendModeBtn.onclick=()=>setMode('friend');
+difficulty.onchange=()=>store.set('tttDifficulty',difficulty.value);
+soundSwitch.onclick=()=>{sound=!sound;store.set('tttSound',sound?'on':'off');soundSwitch.classList.toggle('on',sound);soundSwitch.setAttribute('aria-checked',sound);if(sound)tone(580)};
+document.getElementById('settingsBtn').onclick=()=>modal(true);document.getElementById('closeModal').onclick=()=>modal(false);document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')modal(false)};document.addEventListener('keydown',e=>{if(e.key==='Escape')modal(false)});
+soundSwitch.classList.toggle('on',sound);soundSwitch.setAttribute('aria-checked',sound);setMode(mode);updateScore();
+})();
+</script>
+</body>
+</html>
