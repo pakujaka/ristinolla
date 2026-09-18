@@ -11,14 +11,14 @@
   --line:#2a3945;--x:#ff765e;--o:#72d8c6;--gold:#f4c76b;--shadow:0 22px 70px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{min-height:100%;margin:0}
+html,body{height:100%;min-height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
 body{
-  min-height:100svh;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  height:100svh;min-height:100svh;display:grid;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
   color:var(--ink);font-family:ui-rounded,"SF Pro Rounded","Segoe UI",sans-serif;
   background:
     radial-gradient(circle at 18% 8%,rgba(114,216,198,.11),transparent 27rem),
     radial-gradient(circle at 90% 92%,rgba(255,118,94,.10),transparent 25rem),var(--bg);
-  overflow-x:hidden;
+  overflow:hidden;touch-action:manipulation;
 }
 button{font:inherit;color:inherit}
 .app{width:min(100%,470px)}
@@ -45,7 +45,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.1rem,10vw,3.2re
 .status .turn{display:inline-flex;align-items:center;gap:7px}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--x);box-shadow:0 0 0 5px rgba(255,118,94,.10)}
 .dot.o{background:var(--o);box-shadow:0 0 0 5px rgba(114,216,198,.10)}
-.board-wrap{position:relative;aspect-ratio:1}
+.board-wrap{position:relative;width:min(100%,calc(100svh - 355px));aspect-ratio:1;margin-inline:auto}
 .board{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%;height:100%;padding:9px;border-radius:23px;background:#0d151c;border:1px solid var(--line)}
 .cell{position:relative;display:grid;place-items:center;min-width:0;min-height:0;border:1px solid #2b3a45;border-radius:16px;background:linear-gradient(145deg,#1e2b36,#17232d);cursor:pointer;overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.035);transition:transform .13s,border-color .18s,background .18s}
 .cell:not(:disabled):hover{border-color:#4b5e6b;background:#202f3a}.cell:not(:disabled):active{transform:scale(.94)}
