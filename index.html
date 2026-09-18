@@ -133,7 +133,7 @@ h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.1rem,10vw,3.2re
   <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <div class="sheet-head"><h2 id="settingsTitle">Asetukset</h2><button class="close" id="closeModal" aria-label="Sulje">✕</button></div>
     <div class="setting-row"><div><label for="difficulty">Vaikeustaso</label><span>Tietokonevastustajan pelityyli</span></div><select class="select" id="difficulty"><option value="easy">Rento</option><option value="normal" selected>Fiksu</option><option value="hard">Voittamaton</option></select></div>
-    <div class="setting-row"><div><label>Äänet</label><span>Siirrot ja kierroksen päätös</span></div><button class="switch on" id="soundSwitch" role="switch" aria-checked="true"><i></i></button></div>
+    <div class="setting-row"><div><label>Äänet</label><span>Peliäänet ja 19 s pieruyllätys</span></div><button class="switch on" id="soundSwitch" role="switch" aria-checked="true"><i></i></button></div>
     <div class="setting-row"><div><label>Musiikki</label><span>Rauhallinen kosminen taustasävel</span></div><button class="switch on" id="musicSwitch" role="switch" aria-checked="true"><i></i></button></div>
   </section>
 </div>
@@ -153,7 +153,7 @@ const store={
 function savedScore(){try{const value=JSON.parse(store.get('tttScore','{"X":0,"O":0}'));return Number.isFinite(value.X)&&Number.isFinite(value.O)?value:{X:0,O:0}}catch{return {X:0,O:0}}}
 let board=Array(9).fill(''),turn='X',over=false,thinking=false,aiTimer=null,mode=store.get('tttMode','ai');
 let score=savedScore();
-let sound=store.get('tttSound','on')!=='off',music=store.get('tttMusic','on')!=='off',musicTimer=null,musicStep=0; difficulty.value=store.get('tttDifficulty','normal');
+let sound=store.get('tttSound','on')!=='off',music=store.get('tttMusic','on')!=='off',musicTimer=null,fartTimer=null,musicStep=0; difficulty.value=store.get('tttDifficulty','normal');
 const cells=[];
 for(let i=0;i<9;i++){
  const b=document.createElement('button'); b.className='cell'; b.setAttribute('role','gridcell'); b.setAttribute('aria-label',`Ruutu ${i+1}, tyhjä`); b.dataset.i=i;
@@ -184,18 +184,23 @@ function spawnBanana(celebrate=false){const b=document.createElement('span');b.c
 function scheduleBanana(){setTimeout(()=>{spawnBanana();scheduleBanana()},7000+Math.random()*7000)}
 function spawnComet(){const c=document.createElement('i');c.className='comet';c.style.setProperty('--y',(4+Math.random()*48)+'%');space.appendChild(c);setTimeout(()=>c.remove(),3100)}
 const spaceChords=[[130.81,196,261.63],[146.83,220,293.66],[110,164.81,220],[123.47,185,246.94]];
-function musicPulse(){if(!music||document.hidden)return;const chord=spaceChords[musicStep++%spaceChords.length];tone(chord[0],1.65,'sine',.009,0,'music');tone(chord[1],1.35,'sine',.006,.14,'music');tone(chord[2]*2,.55,'triangle',.003,.48,'music')}
+function musicPulse(){if(!music||document.hidden)return;const chord=spaceChords[musicStep++%spaceChords.length];tone(chord[0],1.65,'sine',.034,0,'music');tone(chord[1],1.35,'sine',.023,.14,'music');tone(chord[2]*2,.55,'triangle',.012,.48,'music')}
 function startMusic(){if(!music||musicTimer)return;musicPulse();musicTimer=setInterval(musicPulse,1800)}
 function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}}
+function fartSound(){if(!sound||document.hidden)return;const ac=audioContext();if(!ac)return;const duration=.72,length=Math.floor(ac.sampleRate*duration),buffer=ac.createBuffer(1,length,ac.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<length;i++){const t=i/ac.sampleRate,env=Math.pow(1-t/duration,2.2),flutter=.45+.55*Math.sin(t*68+Math.sin(t*17)*2);data[i]=(Math.random()*2-1)*env*flutter}const noise=ac.createBufferSource(),filter=ac.createBiquadFilter(),gain=ac.createGain(),rumble=ac.createOscillator(),rumbleGain=ac.createGain();noise.buffer=buffer;filter.type='lowpass';filter.frequency.setValueAtTime(260,ac.currentTime);filter.frequency.exponentialRampToValueAtTime(85,ac.currentTime+duration);filter.Q.value=3.5;gain.gain.setValueAtTime(.001,ac.currentTime);gain.gain.exponentialRampToValueAtTime(.18,ac.currentTime+.025);gain.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration);rumble.type='sawtooth';rumble.frequency.setValueAtTime(115,ac.currentTime);rumble.frequency.exponentialRampToValueAtTime(42,ac.currentTime+duration);rumbleGain.gain.setValueAtTime(.055,ac.currentTime);rumbleGain.gain.exponentialRampToValueAtTime(.001,ac.currentTime+duration);noise.connect(filter).connect(gain).connect(ac.destination);rumble.connect(rumbleGain).connect(ac.destination);noise.start();rumble.start();noise.stop(ac.currentTime+duration);rumble.stop(ac.currentTime+duration)}
+function startFarts(){if(!sound||fartTimer)return;fartTimer=setInterval(fartSound,19000)}
+function stopFarts(){if(fartTimer){clearInterval(fartTimer);fartTimer=null}}
+function startAmbience(){startMusic();startFarts()}
+function stopAmbience(){stopMusic();stopFarts()}
 function modal(open){const m=document.getElementById('modal');m.classList.toggle('open',open);m.setAttribute('aria-hidden',!open);if(open)document.getElementById('closeModal').focus();else document.getElementById('settingsBtn').focus()}
 document.getElementById('newGame').onclick=newRound;
 document.getElementById('resetScore').onclick=()=>{score={X:0,O:0};updateScore();newRound()};
 aiModeBtn.onclick=()=>setMode('ai');friendModeBtn.onclick=()=>setMode('friend');
 difficulty.onchange=()=>store.set('tttDifficulty',difficulty.value);
-soundSwitch.onclick=()=>{sound=!sound;store.set('tttSound',sound?'on':'off');soundSwitch.classList.toggle('on',sound);soundSwitch.setAttribute('aria-checked',sound);if(sound)tone(580)};
+soundSwitch.onclick=()=>{sound=!sound;store.set('tttSound',sound?'on':'off');soundSwitch.classList.toggle('on',sound);soundSwitch.setAttribute('aria-checked',sound);if(sound){tone(580);startFarts()}else stopFarts()};
 musicSwitch.onclick=()=>{music=!music;store.set('tttMusic',music?'on':'off');musicSwitch.classList.toggle('on',music);musicSwitch.setAttribute('aria-checked',music);music?startMusic():stopMusic()};
 document.getElementById('settingsBtn').onclick=()=>modal(true);document.getElementById('closeModal').onclick=()=>modal(false);document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')modal(false)};document.addEventListener('keydown',e=>{if(e.key==='Escape')modal(false)});
-document.addEventListener('pointerdown',startMusic,{once:true});document.addEventListener('keydown',startMusic,{once:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopMusic();else startMusic()});
+document.addEventListener('pointerdown',startAmbience,{once:true});document.addEventListener('keydown',startAmbience,{once:true});document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAmbience();else startAmbience()});
 soundSwitch.classList.toggle('on',sound);soundSwitch.setAttribute('aria-checked',sound);musicSwitch.classList.toggle('on',music);musicSwitch.setAttribute('aria-checked',music);makeSpace();setMode(mode);updateScore();
 })();
 </script>
